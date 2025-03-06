@@ -1,71 +1,83 @@
-import { Text, View, StyleSheet, ImageBackground, Pressable } from 'react-native'
-import { Link } from 'expo-router'
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet } from "react-native";
+import Svg, { Path, Circle } from "react-native-svg";
+import Animated, {
+  useSharedValue,
+  useAnimatedProps,
+  withTiming,
+} from "react-native-reanimated";
+import axios from 'axios';
 
-import icedCoffeeImg from '@/assets/images/iced-coffee.png'
 
-const App = () => {
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
+
+const LOCAL_IP = '192.168.19.18';
+const CURR_API_URL = `http://${LOCAL_IP}:8000/api/markers/curr_aqi`;
+
+const AQIDial = () => {
+  const [aqi, setAqi] = useState(0); // Default AQI
+  const progress = useSharedValue(0.5); // Default position on arc
+
+  const recent_aqi = async () => {
+    try {
+      const response = await axios.get(CURR_API_URL);
+      if (response.data.aqi !== undefined) {
+        setAqi(response.data.aqi);  // Extract only the AQI value
+      } else {
+        console.error("Invalid API response:", response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching markers:', error);
+    }
+  };
+  
+  useEffect(() => {
+    recent_aqi()
+  }, []);
+
+  const radius = 100;
+  const strokeWidth = 10;
+  const cx = 150;
+  const cy = 150;
+  const startAngle = -Math.PI;
+  const endAngle = 0;
+
+  const path = `M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`;
+
+  const animatedProps = useAnimatedProps(() => {
+    const angle = startAngle + progress.value * (endAngle - startAngle);
+    const ballX = cx + radius * Math.cos(angle);
+    const ballY = cy + radius * Math.sin(angle);
+    return { cx: ballX, cy: ballY };
+  });
+
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={icedCoffeeImg}
-        resizeMethod='cover'
-        style={styles.image}
-      >
-        <Text style={styles.title}> Pothole </Text>
-
-        <Link href="/contact" style={{ marginHorizontal: 'auto' }} asChild>
-          <Pressable style={styles.button}>
-            <Text style={styles.buttonText}>Contact Us</Text>
-          </Pressable>
-        </Link>
-
-      </ImageBackground>
+      <Svg width={300} height={200}>
+        <Path d={path} stroke="#ddd" strokeWidth={strokeWidth} fill="none" />
+        <AnimatedCircle
+          animatedProps={animatedProps}
+          r={10}
+          fill="#ff5733"
+        />
+      </Svg>
+      <Text style={styles.aqiText}>AQI: {aqi}</Text>
     </View>
-  )
-}
-
-export default App
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'column',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    flex: 1,
-    resizeMode: "cover",
     justifyContent: "center",
+    alignItems: "center",
   },
-  title: {
-    color: 'white',
+  aqiText: {
     fontSize: 42,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    marginBottom: 120,
+    fontWeight: "bold",
+    color: "#999",
   },
-  link: {
-    color: 'white',
-    fontSize: 42,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    textDecorationLine: 'underline',
-    padding: 4,
-  },
-  button:{
-    height: 60,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    padding: 6,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    padding: 10,
-  },
-})
+});
+
+export default AQIDial;

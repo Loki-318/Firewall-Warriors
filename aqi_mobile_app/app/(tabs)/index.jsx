@@ -4,8 +4,8 @@ import { WebView } from 'react-native-webview';
 import axios from 'axios';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 
-const LOCAL_IP = '192.168.1.3';
-const API_URL = `http://${LOCAL_IP}:5000/api/markers`;
+const LOCAL_IP = '192.168.19.18';
+const API_URL = `http://${LOCAL_IP}:8000/api/markers`;
 
 const MapComponent = () => {
   const [markers, setMarkers] = useState([]);
@@ -102,13 +102,11 @@ const MapComponent = () => {
 
         const markers = ${JSON.stringify(markers)};
         markers.forEach(marker => {
-          L.marker([marker.lat, marker.lng], { icon: customIcon })
+          L.marker([marker.latitude, marker.longitude], { icon: customIcon })
             .bindPopup(
               '<div>' +
-              '<strong>' + marker.name + '</strong><br>' +
-              'Date Added: ' + marker.date_added + '<br>' +
-              'Size: ' + marker.size + '<br>' +
-              'Threat: ' + marker.threat +
+              '<strong>' + marker.aqi + '</strong><br>' +
+              'Date Added: ' + marker.timestamp + '<br>' +
               '</div>',
               {
                 closeButton: true,

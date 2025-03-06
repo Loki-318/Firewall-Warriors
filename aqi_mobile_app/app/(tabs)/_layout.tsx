@@ -28,16 +28,23 @@ export default function TabLayout() {
         }),
       }}>
       <Tabs.Screen
-        name="index"
+        name="temp"
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
       <Tabs.Screen
+        name="index"
+        options={{
+          title: 'map',
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="map-marker-plus" size={24} color={color} />
+        }}
+      />
+      <Tabs.Screen
         name="addPothole"
         options={{
-          title: 'temp',
+          title: 'assistant',
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="map-marker-plus" size={24} color={color} />
         }}
       />
