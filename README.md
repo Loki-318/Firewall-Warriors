@@ -58,7 +58,7 @@ Software & Cloud:
 
 Backend Server: Flask/Django (Python) to collect and process AQI data
 
-Database: Firebase / PostgreSQL for storing AQI records
+Database:  PostgreSQL for storing AQI records
 
 Frontend Visualization: React.js / D3.js for real-time AQI heatmap
 
@@ -72,33 +72,8 @@ MQTT / WebSockets (for real-time communication between devices and server)
 
 RESTful APIs (for data retrieval and visualization)
 
-Setup Instructions
 
-1. Clone the Repository
-
- git clone https://github.com/yourusername/AQI-Drone-System.git
- cd AQI-Drone-System
-
-2. Install Dependencies
-
-Backend (Python)
-
- pip install -r requirements.txt
-
-Frontend (React.js or D3.js)
-
- npm install
- npm start
-
-3. Run the Server
-
- python app.py
-
-4. Running the Blender Drone Simulation
-
- blender --python drone_simulation.py
-
-How It Works
+How It Works:
 
 The mobile device, equipped with the sensor, continuously collects PM2.5 data and GPS coordinates.
 
