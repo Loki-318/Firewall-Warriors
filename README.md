@@ -1,11 +1,10 @@
-Team : Firewall-Warriors
 
 
----
 
 **Team:** Firewall-Warriors
+---
 
-**AQI Monitoring and Drone-Based Pollution Control System**
+**AQI Sentinel**
 
 **Overview:**
 - This project aims to develop a smart Air Quality Monitoring and Response System using a PM2.5 sensor integrated into a phone case.
