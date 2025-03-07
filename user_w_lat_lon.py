@@ -11,6 +11,7 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 from datetime import datetime
 
+
 GROQ_API_KEY = "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"
 app = FastAPI()
 
@@ -67,129 +68,17 @@ async def get_markers():
     finally:
         await conn.close()
 
-@app.get("/api/hotspots")
-async def get_hotspots(days: int = 1, min_aqi: float = 0):
-    """
-    Get air quality hotspots using K-means clustering.
-    
-    Parameters:
-    - days: Number of days of data to consider (default: 1 day)
-    - min_aqi: Minimum AQI threshold to consider (default: 0, i.e., all data)
-    
-    Returns:
-    - List of hotspots with their locations and AQI characteristics
-    """
+@app.get("/api/aqi_data")
+async def get_all_aqi_data():
     conn = await get_db_connection()
     try:
-        # Get data from the specified period with AQI above threshold
-        query = """
-        SELECT latitude, longitude, aqi, timestamp 
-        FROM aqi_data 
-        WHERE timestamp >= CURRENT_DATE - INTERVAL '$1 days'
-        AND aqi >= $2
-        ORDER BY timestamp DESC
-        """
-        rows = await conn.fetch(query, days, min_aqi)
-        
-        # Check if we have enough data points
-        if len(rows) < 2:
-            return {
-                "hotspots": [],
-                "analysis_timestamp": datetime.now(),
-                "total_points_analyzed": 0,
-                "message": "Not enough data points for clustering"
-            }
-        
-        # Extract coordinates and AQI values
-        coordinates = np.array([(row["latitude"], row["longitude"]) for row in rows])
-        aqi_values = np.array([row["aqi"] for row in rows])
-        
-        # Find optimal number of clusters
-        n_clusters = find_optimal_clusters(coordinates)
-        
-        # Perform K-means clustering
-        kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
-        cluster_labels = kmeans.fit_predict(coordinates)
-        
-        # Generate hotspot information
-        hotspots = []
-        for i in range(n_clusters):
-            # Find all points in this cluster
-            mask = cluster_labels == i
-            cluster_points = coordinates[mask]
-            cluster_aqi = aqi_values[mask]
-            
-            # Calculate average coordinates and AQI
-            avg_lat = float(np.mean(cluster_points[:, 0]))
-            avg_lon = float(np.mean(cluster_points[:, 1]))
-            avg_aqi = float(np.mean(cluster_aqi))
-            
-            # Find nearest known location
-            nearest_location = find_nearest_location(avg_lat, avg_lon)
-            
-            # Create hotspot object
-            hotspot = {
-                "cluster_id": i + 1,
-                "latitude": round(avg_lat, 6),
-                "longitude": round(avg_lon, 6),
-                "average_aqi": round(avg_aqi, 2),
-                "data_points": len(cluster_points),
-                "severity": classify_aqi_severity(avg_aqi),
-                "nearest_location": nearest_location
-            }
-            hotspots.append(hotspot)
-        
-        # Return response
-        return {
-            "hotspots": hotspots,
-            "analysis_timestamp": datetime.now(),
-            "total_points_analyzed": len(rows)
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error performing hotspot analysis: {str(e)}")
+        query = "SELECT * FROM aqi_data"
+        rows = await conn.fetch(query)
+        data = [dict(row) for row in rows]  # Convert each row into a dictionary
+        return data
     finally:
         await conn.close()
 
-def classify_aqi_severity(aqi: float) -> str:
-    """Classify AQI based on standard categories"""
-    if aqi <= 50:
-        return "Good"
-    elif aqi <= 100:
-        return "Moderate"
-    elif aqi <= 150:
-        return "Unhealthy for Sensitive Groups"
-    elif aqi <= 200:
-        return "Unhealthy"
-    elif aqi <= 300:
-        return "Very Unhealthy"
-    else:
-        return "Hazardous"
-
-def find_optimal_clusters(coordinates: np.ndarray, max_clusters: int = 6) -> int:
-    """Find optimal number of clusters using silhouette score"""
-    if len(coordinates) <= 2:  # Not enough data for meaningful clustering
-        return min(len(coordinates), 2)
-        
-    silhouette_scores = []
-    # Test from 2 clusters up to max_clusters (or n-1 data points)
-    for n_clusters in range(2, min(max_clusters + 1, len(coordinates))):
-        kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
-        cluster_labels = kmeans.fit_predict(coordinates)
-        
-        # Only calculate score if we have more than one cluster
-        if len(set(cluster_labels)) > 1:
-            try:
-                score = silhouette_score(coordinates, cluster_labels)
-                silhouette_scores.append((n_clusters, score))
-            except:
-                pass  # Skip if silhouette score fails
-    
-    # Return optimal cluster count or default to 2
-    if not silhouette_scores:
-        return 2
-    
-    return max(silhouette_scores, key=lambda x: x[1])[0]
-    
 
 @app.get("/api/markers/today")
 async def get_todays_markers():
@@ -269,6 +158,7 @@ AQI Scale:
         
         # Combine context with user message
         prompt = f"""You are an air quality assistant helping a user in Bangalore, India.
+        Keep your replies concise and informative.
 Use the following AQI information to provide helpful advice, answer questions, or make recommendations.
 
 {context}
@@ -361,5 +251,112 @@ def predict_aqi(data: AQIRequest):
     except FileNotFoundError:
         return {"error": f"Model for {nearest_place} not found."}
 
-if __name__ == "__main__":
+@app.get("/api/hotspots")
+async def get_hotspots(days: int = 1, min_aqi: float = 0):
+    """
+    Get air quality hotspots using K-means clustering.
+    
+    Parameters:
+    - days: Number of days of data to consider (default: 1 day)
+    - min_aqi: Minimum AQI threshold to consider (default: 0, i.e., all data)
+    
+    Returns:
+    - List of hotspots with their locations and AQI characteristics
+    """
+    conn = await get_db_connection()
+    try:
+        query = "SELECT * FROM aqi_data"
+        rows = await conn.fetch(query)
+        
+        # Extract coordinates and AQI values
+        coordinates = np.array([(row["latitude"], row["longitude"]) for row in rows])
+        aqi_values = np.array([row["aqi"] for row in rows])
+        
+        # Find optimal number of clusters
+        n_clusters = find_optimal_clusters(coordinates)
+        
+        # Perform K-means clustering
+        kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+        cluster_labels = kmeans.fit_predict(coordinates)
+        
+        # Generate hotspot information
+        hotspots = []
+        for i in range(n_clusters):
+            # Find all points in this cluster
+            mask = cluster_labels == i
+            cluster_points = coordinates[mask]
+            cluster_aqi = aqi_values[mask]
+            
+            # Calculate average coordinates and AQI
+            avg_lat = float(np.mean(cluster_points[:, 0]))
+            avg_lon = float(np.mean(cluster_points[:, 1]))
+            avg_aqi = float(np.mean(cluster_aqi))
+            
+            # Find nearest known location
+            nearest_location = find_nearest_location(avg_lat, avg_lon)
+            
+            # Create hotspot object
+            hotspot = {
+                "cluster_id": i + 1,
+                "latitude": round(avg_lat, 6),
+                "longitude": round(avg_lon, 6),
+                "average_aqi": round(avg_aqi, 2),
+                "data_points": len(cluster_points),
+                "severity": classify_aqi_severity(avg_aqi),
+                "nearest_location": nearest_location
+            }
+            hotspots.append(hotspot)
+        
+        # Return response
+        return {
+            "hotspots": hotspots,
+            "analysis_timestamp": datetime.now(),
+            "total_points_analyzed": len(rows)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error performing hotspot analysis: {str(e)}")
+    finally:
+        await conn.close()
+
+def classify_aqi_severity(aqi: float) -> str:
+    """Classify AQI based on standard categories"""
+    if aqi <= 50:
+        return "Good"
+    elif aqi <= 100:
+        return "Moderate"
+    elif aqi <= 150:
+        return "Unhealthy for Sensitive Groups"
+    elif aqi <= 200:
+        return "Unhealthy"
+    elif aqi <= 300:
+        return "Very Unhealthy"
+    else:
+        return "Hazardous"
+
+def find_optimal_clusters(coordinates: np.ndarray, max_clusters: int = 6) -> int:
+    """Find optimal number of clusters using silhouette score"""
+    if len(coordinates) <= 2:  # Not enough data for meaningful clustering
+        return min(len(coordinates), 2)
+        
+    silhouette_scores = []
+    # Test from 2 clusters up to max_clusters (or n-1 data points)
+    for n_clusters in range(2, min(max_clusters + 1, len(coordinates))):
+        kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+        cluster_labels = kmeans.fit_predict(coordinates)
+        
+        # Only calculate score if we have more than one cluster
+        if len(set(cluster_labels)) > 1:
+            try:
+                score = silhouette_score(coordinates, cluster_labels)
+                silhouette_scores.append((n_clusters, score))
+            except:
+                pass  # Skip if silhouette score fails
+    
+    # Return optimal cluster count or default to 2
+    if not silhouette_scores:
+        return 2
+    
+    return max(silhouette_scores, key=lambda x: x[1])[0]
+
+if _name_ == "_main_":
     uvicorn.run(app, host="0.0.0.0", port=8000)

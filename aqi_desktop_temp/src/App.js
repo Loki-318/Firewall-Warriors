@@ -7,10 +7,6 @@ import './styles.css';
 import Img from './assets/img.jpg';
 
 
-// Adjust the import path based on where styles are located.
-
-
-
 function App() {
   return (
     <div className="app-container">
@@ -21,17 +17,14 @@ function App() {
         <div className="navbar-menu">
           <Link className="nav-item" to="/map">MAP</Link>
           <Link className="nav-item" to="/insights">INSIGHTS</Link>
-          
         </div>
         <div className="navbar-user">
-  <Link to="/profile" className="user-icon">
-    <i className="fa fa-user"></i>
-    <img src={Img} alt="User"/>
-  </Link>
-</div>
-        
-
-        
+          <Link to="/profile" className="user-icon">
+            <i className="fa fa-user"></i>
+            {/* Alternatively, you can use an image: */}
+            <img src={Img} alt="User" />
+          </Link>
+        </div>
       </nav>
 
       <div className="content">
@@ -41,9 +34,8 @@ function App() {
         <Route path='/insights'>
           <Insights />
         </Route>
-   
         <Route path='/profile'>
-          <Profile/>
+          <Profile />
         </Route>
       </div>
     </div>

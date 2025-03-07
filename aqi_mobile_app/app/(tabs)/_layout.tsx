@@ -8,6 +8,7 @@ import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -37,15 +38,29 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'map',
-          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="map-marker-plus" size={24} color={color} />
+          title: 'Map',
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="map-marker-plus" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="addPothole"
         options={{
-          title: 'assistant',
-          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="map-marker-plus" size={24} color={color} />
+          title: 'Assistant',
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="chat-processing-outline" size={24} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="Drones"
+        options={{
+          title: 'Drones',
+          tabBarIcon: ({ color }) => <FontAwesome5 name="drone" size={24} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="user"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="account" size={24} color={color} />,
         }}
       />
     </Tabs>
