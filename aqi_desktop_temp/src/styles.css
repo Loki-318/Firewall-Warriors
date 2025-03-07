@@ -89,3 +89,12 @@
 .app-container {
     padding: 20px;
 }
+/* Add this to your styles.css */
+.user-icon img {
+    width: 40px;  /* Set the size of the image */
+    height: 40px;  /* The same value for height to make it a circle */
+    border-radius: 50%;  /* Makes the image round */
+    object-fit: cover; 
+    flex:1; /* Ensures the image fills the circle without stretching */
+  }
+  

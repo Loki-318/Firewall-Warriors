@@ -2,7 +2,13 @@ import Link from "./components/Link";
 import Route from "./components/Route";
 import Insights from "./pages/InsightsPage";
 import MapPage from "./pages/MapPage";
+import Profile from "./pages/Profile";
 import './styles.css';
+import Img from './assets/img.jpg';
+
+
+// Adjust the import path based on where styles are located.
+
 
 
 function App() {
@@ -15,14 +21,17 @@ function App() {
         <div className="navbar-menu">
           <Link className="nav-item" to="/map">MAP</Link>
           <Link className="nav-item" to="/insights">INSIGHTS</Link>
+          
         </div>
         <div className="navbar-user">
-          <Link to="/profile" className="user-icon">
-            <i className="fa fa-user"></i>
-            {/* Alternatively, you can use an image: */}
-            {/* <img src="/user-icon.png" alt="User" /> */}
-          </Link>
-        </div>
+  <Link to="/profile" className="user-icon">
+    <i className="fa fa-user"></i>
+    <img src={Img} alt="User"/>
+  </Link>
+</div>
+        
+
+        
       </nav>
 
       <div className="content">
@@ -31,6 +40,10 @@ function App() {
         </Route>
         <Route path='/insights'>
           <Insights />
+        </Route>
+   
+        <Route path='/profile'>
+          <Profile/>
         </Route>
       </div>
     </div>
