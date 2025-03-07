@@ -8,6 +8,9 @@ import Animated, {
 } from "react-native-reanimated";
 import axios from 'axios';
 
+const LOCAL_IP = '192.168.19.18';
+const CURR_API_URL = `http://${LOCAL_IP}:8000/api/markers/curr_aqi`;
+
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const { width } = Dimensions.get('window');
 
@@ -18,10 +21,16 @@ const AQIDial = () => {
   const progress = useSharedValue(0.5); // Default position on arc
 
   const recent_aqi = async () => {
-    // In a real app, you'd fetch this from an API
-    const AQI = 400;
-    setAqi(AQI);
-    
+    try {
+      const response = await axios.get(CURR_API_URL);
+      if (response.data.aqi !== undefined) {
+        setAqi(response.data.aqi);  // Extract only the AQI value
+      } else {
+        console.error("Invalid API response:", response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching markers:', error);
+    }
     // Update the progress based on AQI (0-500 scale)
     // AQI 0 = 0, AQI 500 = 1
     const normalizedProgress = Math.min(AQI / 500, 1);
@@ -427,247 +436,5 @@ const styles = StyleSheet.create({
   }
 });
 
+
 export default AQIDial;
-
-/*import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Dimensions } from "react-native";
-import Svg, { Path, Circle, Text as SvgText } from "react-native-svg";
-import Animated, {
-  useSharedValue,
-  useAnimatedProps,
-  withTiming,
-} from "react-native-reanimated";
-import axios from 'axios';
-
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-
-const AQIDial = () => {
-  const [aqi, setAqi] = useState(0); // Default AQI
-  const [regionData, setRegionData] = useState([]); // Data for regional heatmap
-  const progress = useSharedValue(0.5); // Default position on arc
-
-  const recent_aqi = async () => {
-    // In a real app, you'd fetch this from an API
-    const AQI = 91;
-    setAqi(AQI);
-    
-    // Update the progress based on AQI (0-500 scale)
-    // AQI 0 = 0, AQI 500 = 1
-    const normalizedProgress = Math.min(AQI / 500, 1);
-    progress.value = withTiming(normalizedProgress, { duration: 1000 });
-    
-    // Fetch mock regional data
-    // In a real app, you'd get this from an API based on user location
-    fetchRegionalData();
-  };
-  
-  const fetchRegionalData = () => {
-    // Mock data for regional heatmap (in real app, get from API)
-    const mockRegionalData = [
-      { id: 1, location: "Downtown", aqi: 95 },
-      { id: 2, location: "North Side", aqi: 88 },
-      { id: 3, location: "East End", aqi: 102 },
-      { id: 4, location: "West Hills", aqi: 76 },
-      { id: 5, location: "South Bay", aqi: 85 },
-    ];
-    setRegionData(mockRegionalData);
-  };
-  
-  useEffect(() => {
-    recent_aqi();
-  }, []);
-
-  // Get color based on AQI value
-  const getAqiColor = (value) => {
-    if (value <= 50) return "#00e400"; // Good
-    if (value <= 100) return "#ffff00"; // Moderate
-    if (value <= 150) return "#ff7e00"; // Unhealthy for Sensitive Groups
-    if (value <= 200) return "#ff0000"; // Unhealthy
-    if (value <= 300) return "#99004c"; // Very Unhealthy
-    return "#7e0023"; // Hazardous
-  };
-  
-  // Get text description based on AQI value
-  const getAqiDescription = (value) => {
-    if (value <= 50) return "Good";
-    if (value <= 100) return "Moderate";
-    if (value <= 150) return "Unhealthy for Sensitive Groups";
-    if (value <= 200) return "Unhealthy";
-    if (value <= 300) return "Very Unhealthy";
-    return "Hazardous";
-  };
-
-  const radius = 100;
-  const strokeWidth = 10;
-  const cx = 150;
-  const cy = 150;
-  const startAngle = -Math.PI;
-  const endAngle = 0;
-
-  const path = `M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`;
-
-  
-
-  const animatedProps = useAnimatedProps(() => {
-    const angle = startAngle + progress.value * (endAngle - startAngle);  // Calculate angle
-    const ballX = cx + radius * Math.cos(angle);  // Calculate X position
-    const ballY = cy + radius * Math.sin(angle);  // Calculate Y position
-    return { cx: ballX, cy: ballY };  // Return animated properties for the ball's position
-  });
-  
-  return (
-    <View style={styles.container}>
-      <Text style={styles.headerTitle}>AQI Sentinel</Text>
-      <Text style={styles.headerSubtitle}>Real-time Air Quality Monitoring</Text>
-      
-      <View style={styles.dialContainer}>
-        <Svg width="300" height="300" viewBox="0 0 300 300">
-          {/* Background gradient arc 
-          <Path
-            d={path}
-            stroke="#f0f0f0"
-            strokeWidth={strokeWidth}
-            fill="transparent"
-          />
-          
-         
-          <Path
-            d={path}
-            stroke={getAqiColor(aqi)}
-            strokeWidth={strokeWidth}
-            strokeDasharray={Math.PI * radius}
-            strokeDashoffset={Math.PI * radius * (1 - progress.value)}
-            fill="transparent"
-          />
-          
-      
-          <AnimatedCircle
-            r={strokeWidth + 2}
-            fill={getAqiColor(aqi)}
-            animatedProps={animatedProps}
-          />
-          
-          
-          <SvgText x="50" y="170" fontSize="12" fill="#888">0</SvgText>
-          <SvgText x="250" y="170" fontSize="12" fill="#888">500</SvgText>
-          
-
-          <SvgText
-            x={cx}
-            y={cy}
-            fontSize="36"
-            fontWeight="bold"
-            fill={getAqiColor(aqi)}
-            textAnchor="middle"
-          >
-            {aqi}
-          </SvgText>
-          
-          
-          <SvgText
-            x={cx}
-            y={cy + 30}
-            fontSize="14"
-            fill="#666"
-            textAnchor="middle"
-          >
-            {getAqiDescription(aqi)}
-          </SvgText>
-        </Svg>
-      </View>
-      
-      <View style={styles.heatmapContainer}>
-        <Text style={styles.sectionTitle}>Regional Air Quality</Text>
-        
-        {regionData.map((item) => (
-          <View key={item.id} style={styles.heatmapItem}>
-            <Text style={styles.locationText}>{item.location}</Text>
-            <View style={styles.aqiBar}>
-              <View 
-                style={[
-                  styles.aqiBarFill, 
-                  { 
-                    width: `${Math.min(item.aqi / 5, 100)}%`,
-                    backgroundColor: getAqiColor(item.aqi)
-                  }
-                ]} 
-              />
-            </View>
-            <Text 
-              style={[
-                styles.heatmapAqi, 
-                { color: getAqiColor(item.aqi) }
-              ]}
-            >
-              {item.aqi}
-            </Text>
-          </View>
-        ))}
-      </View>
-    </View>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-    marginBottom: 5,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    textAlign: "center",
-    color: "#888",
-    marginBottom: 20,
-  },
-  dialContainer: {
-    alignItems: "center",
-    marginBottom: 30,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 15,
-    color: "#333",
-  },
-  heatmapContainer: {
-    marginTop: 10,
-  },
-  heatmapItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  locationText: {
-    width: 100,
-    fontSize: 14,
-    color: "#444",
-  },
-  aqiBar: {
-    flex: 1,
-    height: 16,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 8,
-    overflow: "hidden",
-  },
-  aqiBarFill: {
-    height: "100%",
-    borderRadius: 8,
-  },
-  heatmapAqi: {
-    width: 40,
-    fontSize: 14,
-    fontWeight: "bold",
-    textAlign: "right",
-    marginLeft: 10,
-  }
-});
-
-export default AQIDial;*/

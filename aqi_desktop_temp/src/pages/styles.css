@@ -1,0 +1,105 @@
+.App {
+    font-family: sans-serif;
+    text-align: center;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+#root {
+    background-color: rgb(40, 45, 50);
+    height: 100vh;
+    color: white;
+    font-family: "Helvetica", "Arial", sans-serif;
+}
+
+.leaflet-container {
+    height: 80vh;
+}
+
+.parent-leaflet-container {
+    padding: 20px;
+}
+
+.custom-marker-cluster {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #0078ff;
+    border-radius: 50%;
+    width: 33px;
+    height: 33px;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    line-height: 33px;
+    overflow: hidden;
+}
+
+.popup-content {
+    max-width: 200px;
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+.leaflet-popup-content-wrapper {
+    max-width: 250px;
+    overflow-wrap: break-word;
+}
+
+.leaflet-popup-content {
+    white-space: normal;
+}
+
+.coordinates-container {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.coordinates-text {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.button-hover-mode {
+    padding: 8px 16px;
+    background-color: #0078ff;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.button-hover-mode:hover {
+    background-color: #005bb5;
+}
+
+.insights-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.chart-container {
+    margin: 20px 0;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

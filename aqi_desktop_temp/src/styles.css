@@ -1,0 +1,91 @@
+/* App.css */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #333;
+    color: white;
+    padding: 0 20px;
+    height: 60px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-logo h1 {
+    margin: 0;
+    margin-right: 15px;
+    font-size: 1.5rem;
+}
+
+.navbar-menu {
+    display: flex;
+    gap: 20px;
+}
+
+.nav-item {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-user {
+    margin-left: auto;
+}
+
+.user-icon {
+    color: white;
+    font-size: 1.2rem;
+    padding: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    transition: background-color 0.3s;
+}
+
+.user-icon:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+}
+
+.App {
+    font-family: sans-serif;
+    text-align: center;
+}
+
+.button {
+    background-color: #342f52;
+    color: white;
+    font-weight: bold;
+    margin-left: 20px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.button:hover {
+    background-color: #15803d;
+}
+
+.app-container {
+    padding: 20px;
+}
